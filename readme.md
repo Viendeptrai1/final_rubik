@@ -1,103 +1,88 @@
-# 🎮 Rubik's Cube Solver
+# 🧩 Rubik's Cube Solver
 
-![Rubik's Cube](https://img.shields.io/badge/Rubik's-Cube-blue)
-![Version](https://img.shields.io/badge/version-1.0.0-green)
-![License](https://img.shields.io/badge/license-MIT-orange)
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![Algorithm](https://img.shields.io/badge/Algorithm-A*%20%7C%20BFS-green)
+![Version](https://img.shields.io/badge/version-1.0.0-orange)
 
 ## 📖 Giới thiệu | Introduction
 
-Dự án này là một ứng dụng giải và mô phỏng khối Rubik. Nó cho phép người dùng tương tác với mô hình 3D của khối Rubik, tự động giải quyết các cấu hình và học các thuật toán giải khối Rubik.
+Dự án này là một giải pháp giải khối Rubik sử dụng thuật toán A* và BFS (Breadth-First Search). Chương trình mô hình hóa khối Rubik 3x3x3 và tìm ra chuỗi các bước di chuyển tối ưu để đưa khối Rubik từ trạng thái xáo trộn về trạng thái đã được giải.
 
-*This project is a Rubik's Cube solver and simulator application. It allows users to interact with a 3D model of a Rubik's Cube, automatically solve configurations, and learn Rubik's Cube solving algorithms.*
+*This project is a Rubik's Cube solver using A* and BFS (Breadth-First Search) algorithms. The program models a 3x3x3 Rubik's Cube and finds the optimal sequence of moves to transform a scrambled cube to its solved state.*
 
-## ✨ Tính năng | Features
+## ✨ Tính năng chính | Key Features
 
-- 🧩 Mô phỏng khối Rubik 3D với đồ họa mượt mà
-- 🔄 Các thao tác xoay trực quan
-- 🤖 Thuật toán tự động giải
-- 📊 Thống kê và theo dõi thời gian giải
-- 🎯 Các chế độ luyện tập khác nhau
-- 🌓 Giao diện sáng/tối
-
-*- 3D Rubik's Cube simulation with smooth graphics*
-*- Intuitive rotation operations*
-*- Automatic solving algorithms*
-*- Solving time statistics and tracking*
-*- Various practice modes*
-*- Light/Dark interface*
+- Biểu diễn khối Rubik 3x3x3 với đầy đủ hoán vị và định hướng các khối góc và cạnh
+- Thuật toán A* với hàm đánh giá heuristic thông minh tối ưu quá trình tìm kiếm
+- Thuật toán BFS để tìm ra lời giải ngắn nhất
+- So sánh hiệu suất giữa các thuật toán giải khối Rubik
+- Tự động dừng tìm kiếm sau 60 giây để tránh treo chương trình
 
 ## 🛠️ Công nghệ sử dụng | Technologies
 
-- Ngôn ngữ: [Liệt kê ngôn ngữ lập trình]
-- Thư viện đồ họa: [Liệt kê thư viện]
-- Thuật toán: [Liệt kê thuật toán]
+- **Ngôn ngữ lập trình:** Python
+- **Cấu trúc dữ liệu:** 
+  - Hàng đợi ưu tiên (heapq)
+  - Hàng đợi (deque)
+  - Tập hợp (set, dict)
+- **Thuật toán:**
+  - A* (A-star) với hàm heuristic tùy chỉnh
+  - Thuật toán tìm kiếm theo chiều rộng (BFS)
 
-*- Languages: [List programming languages]*
-*- Graphics Libraries: [List libraries]*
-*- Algorithms: [List algorithms]*
+## 📋 Cấu trúc project | Project Structure
 
-## 📋 Yêu cầu hệ thống | System Requirements
+- `rubik_chen.py`: Định nghĩa trạng thái khối Rubik, các nước đi và hàm heuristic
+- `rubik_solver.py`: Cài đặt thuật toán A* và BFS để giải khối Rubik
 
-- [Liệt kê các yêu cầu hệ thống]
-
-## ⚙️ Cài đặt | Installation
+## ⚙️ Cách cài đặt | Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/username/final_rubik.git
+git clone https://github.com/yourusername/final_rubik.git
 
 # Di chuyển vào thư mục dự án
 cd final_rubik
 
-# Cài đặt các dependencies
-npm install # hoặc yarn install
-
-# Khởi chạy ứng dụng
-npm start # hoặc yarn start
+# Chạy chương trình
+python rubik_solver.py
 ```
 
 ## 🚀 Cách sử dụng | Usage
 
-### Giao diện chính | Main Interface
+1. **Định nghĩa trạng thái ban đầu:**
+   ```python
+   start_state = SOLVED_STATE.copy()
+   # Áp dụng các bước di chuyển để tạo trạng thái xáo trộn
+   start_state = apply_move(start_state, "R")
+   start_state = apply_move(start_state, "U")
+   ```
 
-![Screenshot của giao diện](path/to/screenshot.png)
+2. **Giải khối Rubik sử dụng A*:**
+   ```python
+   path, message = a_star(start_state)
+   if path:
+       print("Đường đi:", path)
+       print(message)
+       print("Số node đã duyệt:", dem_so_node)
+   ```
 
-1. **Tương tác với khối Rubik:**
-   - Kéo để xoay toàn bộ khối
-   - Nhấp vào một mặt và kéo để xoay một tầng
-   - Nhấn đúp để đánh dấu một tầng
+3. **Giải khối Rubik sử dụng BFS:**
+   ```python
+   path, message = bfs(start_state)
+   if path:
+       print("Đường đi:", path)
+       print(message)
+       print("Số node đã duyệt:", dem_so_node)
+   ```
 
-2. **Các nút chức năng:**
-   - Reset: Đưa khối về trạng thái đã giải
-   - Scramble: Xáo trộn ngẫu nhiên khối
-   - Solve: Tự động giải khối
+## 🧠 Thuật toán giải | Solving Algorithms
 
-## 🧠 Thuật toán | Algorithms
-
-Dự án này sử dụng các thuật toán sau để giải khối Rubik:
-
-- CFOP (Cross, F2L, OLL, PLL)
-- Fridrich Method
-- Beginner's Method
-
-## 📚 Tài liệu | Documentation
-
-Để biết thêm chi tiết về API và cấu trúc dự án, hãy xem [tài liệu đầy đủ](docs/readme.md).
-
-## 👥 Đóng góp | Contributing
-
-Đóng góp luôn được chào đón! Hãy xem [hướng dẫn đóng góp](CONTRIBUTING.md) để biết thêm chi tiết.
-
-## 📄 Giấy phép | License
-
-Dự án này được cấp phép theo [Giấy phép MIT](LICENSE).
-
-## 📞 Liên hệ | Contact
-
-- Email: your.email@example.com
-- GitHub: [@username](https://github.com/username)
-- Website: [yourwebsite.com](https://yourwebsite.com)
+### A* Search
+Dự án sử dụng thuật toán A* với hàm heuristic tùy chỉnh để tối ưu hóa quá trình tìm kiếm. Hàm heuristic tính toán:
+- Số khối góc và cạnh đặt sai vị trí
+- Số khối góc và cạnh sai định hướng
+Dự án này được phân phối dưới [Loại giấy phép]. Xem file `LICENSE` để biết thêm chi tiết.
 
 ---
 
-<p align="center">Made with ❤️ by [Your Name]</p>
+<p align="center">💻 Happy Cubing! 🧩</p>
