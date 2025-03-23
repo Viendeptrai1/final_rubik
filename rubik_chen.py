@@ -1,26 +1,30 @@
 class RubikState:
     def __init__(self, cp, co, ep, eo):
-        self.cp = cp  # Hoán vị góc
-        self.co = co  # Định hướng góc
-        self.ep = ep  # Hoán vị cạnh
-        self.eo = eo  # Định hướng cạnh
+        # Chuyển đổi tất cả các danh sách thành tuple để tăng hiệu suất
+        self.cp = tuple(cp)  # Hoán vị góc
+        self.co = tuple(co)  # Định hướng góc
+        self.ep = tuple(ep)  # Hoán vị cạnh
+        self.eo = tuple(eo)  # Định hướng cạnh
 
     def __eq__(self, other):
+        # So sánh tuple trực tiếp, nhanh hơn list
         return (self.cp == other.cp and self.co == other.co and
                 self.ep == other.ep and self.eo == other.eo)
 
     def __hash__(self):
-        return hash((tuple(self.cp), tuple(self.co), tuple(self.ep), tuple(self.eo)))
+        # Đơn giản hơn vì đã dùng tuple, không cần chuyển đổi
+        return hash((self.cp, self.co, self.ep, self.eo))
 
     def copy(self):
-        return RubikState(self.cp.copy(), self.co.copy(), self.ep.copy(), self.eo.copy())
+        # Không cần .copy() cho tuple vì tuple là immutable
+        return RubikState(self.cp, self.co, self.ep, self.eo)
 
-# Trạng thái mục tiêu
+# Trạng thái mục tiêu - sử dụng tuple thay vì list
 SOLVED_STATE = RubikState(
-    cp=[0, 1, 2, 3, 4, 5, 6, 7],
-    co=[0, 0, 0, 0, 0, 0, 0, 0],
-    ep=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-    eo=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    cp=(0, 1, 2, 3, 4, 5, 6, 7),
+    co=(0, 0, 0, 0, 0, 0, 0, 0),
+    ep=(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11),
+    eo=(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
 )
 
 # Định nghĩa các nước đi
@@ -150,36 +154,19 @@ MOVE_NAMES = list(MOVES.keys())
 
 # Hàm áp dụng một nước đi
 def apply_move(state, move):
-    new_state = state.copy()
     move_data = MOVES[move]
+    
+    # Tạo tuple mới trực tiếp, bỏ qua bước tạo list
+    new_cp = tuple(state.cp[move_data["cp_perm"][i]] for i in range(8))
+    new_co = tuple((state.co[move_data["cp_perm"][i]] + move_data["co_change"][i]) % 3 for i in range(8))
+    new_ep = tuple(state.ep[move_data["ep_perm"][i]] for i in range(12))
+    new_eo = tuple((state.eo[move_data["ep_perm"][i]] + move_data["eo_change"][i]) % 2 for i in range(12))
+    
+    return RubikState(new_cp, new_co, new_ep, new_eo)
 
-    # Áp dụng hoán vị góc
-    new_cp = [0] * 8
-    for i in range(8):
-        new_cp[i] = state.cp[move_data["cp_perm"][i]]
-    new_state.cp = new_cp
-
-    # Áp dụng thay đổi định hướng góc
-    new_co = [0] * 8
-    for i in range(8):
-        new_co[i] = (state.co[move_data["cp_perm"][i]] + move_data["co_change"][i]) % 3
-    new_state.co = new_co
-
-    # Áp dụng hoán vị cạnh
-    new_ep = [0] * 12
-    for i in range(12):
-        new_ep[i] = state.ep[move_data["ep_perm"][i]]
-    new_state.ep = new_ep
-
-    # Áp dụng thay đổi định hướng cạnh
-    new_eo = [0] * 12
-    for i in range(12):
-        new_eo[i] = (state.eo[move_data["ep_perm"][i]] + move_data["eo_change"][i]) % 2
-    new_state.eo = new_eo
-
-    return new_state
 def calculate_parity(perm):
     """Tính dấu hoán vị (chẵn: 0, lẻ: 1)"""
+    # Không cần thay đổi vì tuple có thể duyệt như list
     inversions = 0
     for i in range(len(perm)):
         for j in range(i + 1, len(perm)):
@@ -188,27 +175,36 @@ def calculate_parity(perm):
     return inversions % 2
 
 def heuristic(state):
-    # Heuristic cho các khối góc
-    corner_misplaced = sum(1 for i in range(8) if state.cp[i] != i)
-    corner_misoriented = sum(1 for i in range(8) if state.co[i] != 0)
-    corner_total = corner_misplaced + corner_misoriented  # Tổng số lỗi của các khối góc
-    h_corner = corner_total // 4  # Mỗi nước đi sửa tối đa 4 khối
-
-    # Heuristic cho các khối cạnh
-    edge_misplaced = sum(1 for i in range(12) if state.ep[i] != i)
-    edge_misoriented = sum(1 for i in range(12) if state.eo[i] != 0)
+    # Tối ưu hóa bằng cách kết hợp các vòng lặp
+    corner_misplaced = corner_misoriented = 0
+    for i in range(8):
+        if state.cp[i] != i:
+            corner_misplaced += 1
+        if state.co[i] != 0:
+            corner_misoriented += 1
+    
+    edge_misplaced = edge_misoriented = 0
+    for i in range(12):
+        if state.ep[i] != i:
+            edge_misplaced += 1
+        if state.eo[i] != 0:
+            edge_misoriented += 1
+    
+    corner_total = corner_misplaced + corner_misoriented
+    h_corner = corner_total // 4
+    
     edge_total = edge_misplaced + edge_misoriented
     h_edge = edge_total // 4
-
-    # Heuristic cho dấu hoán vị
+    
+    # Tính toán dấu hoán vị
     corner_parity = calculate_parity(state.cp)
     edge_parity = calculate_parity(state.ep)
-    h_parity = 1 if corner_parity != edge_parity else 0  # Cần ít nhất 1 nước đi để sửa dấu hoán vị
-
-    # Heuristic cho định hướng tổng
+    h_parity = 1 if corner_parity != edge_parity else 0
+    
+    # Tính toán định hướng tổng
     corner_orient_sum = sum(state.co) % 3
     edge_orient_sum = sum(state.eo) % 2
-    h_orient = 1 if corner_orient_sum != 0 or edge_orient_sum != 0 else 0  # Cần ít nhất 1 nước đi để sửa định hướng
-
+    h_orient = 1 if corner_orient_sum != 0 or edge_orient_sum != 0 else 0
+    
     # Lấy giá trị lớn nhất
     return max(h_corner, h_edge, h_parity, h_orient)
