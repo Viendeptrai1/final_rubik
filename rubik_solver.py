@@ -2,7 +2,7 @@ import heapq
 import time
 from collections import deque
 from rubik_chen import *
-
+from rubik_2x2 import *
 def a_star(start_state):
     global dem_so_node
     counter = 0  # Counter to break ties in heap
@@ -61,8 +61,12 @@ def bfs(start_state):
 start_state = SOLVED_STATE.copy()
 start_state = apply_move(start_state, "R")
 start_state = apply_move(start_state, "U")
-# start_state = apply_move(start_state, "B")
 
+rubik2x2 = Rubik2x2State(start_state.cp, start_state.co)
+rubik2x2 = apply_move(rubik2x2, "R")
+rubik2x2 = apply_move(start_state, "U")
+rubik2x2 = apply_move(rubik2x2, "R")
+rubik2x2 = apply_move(start_state, "B")
 dem_so_node = 0
 print("Giải bằng A*:")
 path, message = a_star(start_state)
@@ -73,8 +77,10 @@ if path:
 else:
     print("Kết quả:", message)
 
-print("\nGiải bằng BFS:")
-path, message = bfs(start_state)
+# Giai rubik 2x2 astar
+dem_so_node = 0
+print("Giải Rubik 2x2 bằng A*:")
+path, message = a_star(rubik2x2)
 if path:
     print("Đường đi:", path)
     print(message)
