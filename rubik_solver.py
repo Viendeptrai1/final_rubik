@@ -1,9 +1,9 @@
 import heapq
 import time
 from collections import deque
-from rubik_chen import *
-from rubik_2x2 import *
-def a_star(start_state):
+from rubik_chen import SOLVED_STATE_3x3, MOVE_NAMES, heuristic_3x3
+from rubik_2x2 import Rubik2x2State, SOLVED_STATE_2x2, heuristic_2x2
+def a_star(start_state, SOLVED_STATE, heuristic=heuristic_3x3):
     global dem_so_node
     counter = 0  # Counter to break ties in heap
     queue = [(heuristic(start_state), 0, counter, start_state, [])]
@@ -18,7 +18,7 @@ def a_star(start_state):
 
         for move in MOVE_NAMES:
             dem_so_node += 1
-            new_state = apply_move(state, move)
+            new_state = state.apply_move(move)  # Fixed: call apply_move as a method of state
             new_g_score = g_score + 1
             if new_state not in visited or new_g_score < visited[new_state]:
                 visited[new_state] = new_g_score
@@ -32,7 +32,7 @@ def a_star(start_state):
 
     return None, "Không tìm thấy lời giải"
 
-def bfs(start_state):
+def bfs(start_state, SOLVED_STATE, heuristic=heuristic_3x3):
     global dem_so_node
     dem_so_node = 0
     queue = deque([(start_state, [])])  # (state, path)
@@ -47,7 +47,7 @@ def bfs(start_state):
         
         for move in MOVE_NAMES:
             dem_so_node += 1
-            new_state = apply_move(state, move)
+            new_state = state.apply_move(move)  # Fixed: call apply_move as a method of state
             if new_state not in visited:
                 visited.add(new_state)
                 queue.append((new_state, path + [move]))
@@ -58,18 +58,17 @@ def bfs(start_state):
     return None, "Không tìm thấy lời giải"
 
 # Tạo trạng thái ban đầu (xáo trộn nhẹ)
-start_state = SOLVED_STATE.copy()
-start_state = apply_move(start_state, "R")
-start_state = apply_move(start_state, "U")
+start_state = SOLVED_STATE_3x3.copy()
+start_state = start_state.apply_move("R")  
+start_state = start_state.apply_move("U") 
 
-rubik2x2 = Rubik2x2State(start_state.cp, start_state.co)
-rubik2x2 = apply_move(rubik2x2, "R")
-rubik2x2 = apply_move(start_state, "U")
-rubik2x2 = apply_move(rubik2x2, "R")
-rubik2x2 = apply_move(start_state, "B")
+start_state_2x2 = SOLVED_STATE_2x2.copy()
+start_state_2x2 = start_state_2x2.apply_move("F")  
+start_state_2x2 = start_state_2x2.apply_move("L") 
+
 dem_so_node = 0
 print("Giải bằng A*:")
-path, message = a_star(start_state)
+path, message = a_star(start_state, SOLVED_STATE_3x3)
 if path:
     print("Đường đi:", path)
     print(message)
@@ -77,10 +76,29 @@ if path:
 else:
     print("Kết quả:", message)
 
-# Giai rubik 2x2 astar
 dem_so_node = 0
-print("Giải Rubik 2x2 bằng A*:")
-path, message = a_star(rubik2x2)
+print("Giải bằng A*:")
+path, message = a_star(start_state_2x2, SOLVED_STATE_2x2, heuristic=heuristic_2x2)
+if path:
+    print("Đường đi:", path)
+    print(message)
+    print("Số node đã duyệt:", dem_so_node)
+else:
+    print("Kết quả:", message)
+
+dem_so_node = 0
+print("Giải bằng BFS:")
+path, message = bfs(start_state, SOLVED_STATE_3x3)
+if path:
+    print("Đường đi:", path)
+    print(message)
+    print("Số node đã duyệt:", dem_so_node)
+else:
+    print("Kết quả:", message)
+    
+dem_so_node = 0
+print("Giải bằng BFS:")
+path, message = bfs(start_state_2x2, SOLVED_STATE_2x2, heuristic=heuristic_2x2)
 if path:
     print("Đường đi:", path)
     print(message)
